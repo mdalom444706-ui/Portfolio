@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Mijanur Rahman</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen py-12 px-6 flex items-center justify-center">
+
+    <div class="max-w-2xl w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-gauge-high mr-2"></i>অ্যাডমিন ড্যাশবোর্ড</h1>
+                <p class="text-xs text-slate-400 mt-1">আপনার ওয়েবসাইটের প্রজেক্ট ও থাম্বনেইল আপডেট করুন</p>
+            </div>
+            <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs px-4 py-2.5 rounded-xl transition">
+                <i class="fa-solid fa-globe mr-1"></i> লাইভ সাইট
+            </a>
+        </div>
+
+        <!-- Admin Form -->
+        <form id="admin-form" class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1.5">প্রজেক্ট বা পোস্টের শিরোনাম (Title)</label>
+                <input type="text" id="title" placeholder="যেমন: নতুন ঘড়ি বা আতর অফার" required 
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5">ক্যাটাগরি (Category)</label>
+                    <input type="text" id="category" placeholder="যেমন: Watch Gallery" required 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1.5">থাম্বনেইল বা ছবির লিংক (Image URL)</label>
+                    <input type="url" id="imageUrl" placeholder="ছবির ডিরেক্ট লিংক দিন" required 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1.5">বিস্তারিত বিবরণ (Description)</label>
+                <textarea id="description" rows="4" placeholder="প্রজেক্ট সম্পর্কে কিছু লিখুন..." required 
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none transition"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-4 rounded-xl transition shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-cloud-arrow-up mr-2"></i> পোস্ট পাবলিশ করুন
+            </button>
+        </form>
+
+        <p id="msg" class="text-center text-sm mt-4 font-medium"></p>
+    </div>
+
+    <!-- Firebase Script Template -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ফায়ারবেজ কনফিগারেশন এখানে বসাবেন
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('admin-form');
+        const msg = document.getElementById('msg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const imageUrl = document.getElementById('imageUrl').value;
+            const description = document.getElementById('description').value;
+
+            msg.textContent = "আপলোড হচ্ছে...";
+            msg.className = "text-center text-sm mt-4 text-amber-400";
+
+            try {
+                await addDoc(collection(db, "posts"), {
+                    title,
+                    category,
+                    imageUrl,
+                    description,
+                    createdAt: new Date()
+                });
+                msg.textContent = "সফলভাবে পোস্ট পাবলিশ হয়েছে!";
+                msg.className = "text-center text-sm mt-4 text-green-400";
+                form.reset();
+            } catch (error) {
+                msg.textContent = "ত্রুটি ঘটেছে: " + error.message;
+                msg.className = "text-center text-sm mt-4 text-red-400";
+            }
+        });
+    </script>
+</body>
+</html>
